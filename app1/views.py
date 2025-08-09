@@ -93,3 +93,17 @@ class DeleteClient(DeleteView):
     model = Client
     template_name = 'delete_client.html'
     success_url = reverse_lazy('admin_panel')
+
+
+class UpdateDeal(UpdateView):
+    model = Deal
+    form_class = DealForm
+    template_name = 'update_deal.html'
+    success_url = reverse_lazy('admin_panel')
+
+
+class DeleteDeal(DeleteView):
+    model = Deal
+    template_name = 'delete_dela.html'
+    success_url = reverse_lazy('admin_panel')
+

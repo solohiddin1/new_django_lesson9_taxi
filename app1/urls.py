@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home,manage_users,AddTarifView,ClientListView , DriverListView, AddClientView, AddDriverView, AddDealView,UpdateClient,UpdateDriver,DeleteClient,DeleteDriver
+from .views import UpdateDeal,DeleteDeal,home,manage_users,AddTarifView,ClientListView , DriverListView, AddClientView, AddDriverView, AddDealView,UpdateClient,UpdateDriver,DeleteClient,DeleteDriver
 
 
 urlpatterns = [
@@ -17,5 +17,9 @@ urlpatterns = [
     path('delete_driver/<int:pk>',DeleteDriver.as_view(),name='delete_driver'),
     path('update_client/<int:pk>',UpdateClient.as_view(),name='update_client'),
     path('delete_client/<int:pk>',DeleteClient.as_view(),name='delete_client'),
+
+    path('delete_deal/<int:pk>',DeleteDeal.as_view(),name='delete_deal'),
+    path('update_deal/<int:pk>',UpdateDeal.as_view(),name='update_deal'),
+
 
 ]
