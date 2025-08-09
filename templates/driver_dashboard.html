@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Platform Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-tab {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .ride-timer {
+            font-family: 'Courier New', monospace;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 40;
+                height: 100vh;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="driver-dashboard" class="hidden min-h-screen md:flex">
+        <!-- Sidebar -->
+        <div class="sidebar bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform md:relative md:translate-x-0">
+            <div class="flex items-center space-x-2 px-4">
+                <i class="fas fa-taxi text-2xl text-green-400"></i>
+                <a href="{% url 'home' %}">Taxi dashboard</a>
+            </div>
+            <nav>
+                <button onclick="showDriverTab('ride-requests')" class="driver-tab w-full flex items-center space-x-2 px-4 py-3 hover:bg-gray-700 rounded transition duration-200 active-tab">
+                    <i class="fas fa-bell"></i>
+                    <span>Ride Requests</span>
+                </button>
+                <button onclick="showDriverTab('current-ride')" class="driver-tab w-full flex items-center space-x-2 px-4 py-3 hover:bg-gray-700 rounded transition duration-200">
+                    <i class="fas fa-car-side"></i>
+                    <span>Current Ride</span>
+                </button>
+                <button onclick="showDriverTab('earnings')" class="driver-tab w-full flex items-center space-x-2 px-4 py-3 hover:bg-gray-700 rounded transition duration-200">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Earnings</span>
+                </button>
+                <button onclick="showDriverTab('vehicle-info')" class="driver-tab w-full flex items-center space-x-2 px-4 py-3 hover:bg-gray-700 rounded transition duration-200">
+                    <i class="fas fa-car"></i>
+                    <span>Vehicle Info</span>
+                </button>
+                <button onclick="showDriverTab('settings')" class="driver-tab w-full flex items-center space-x-2 px-4 py-3 hover:bg-gray-700 rounded transition duration-200">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+                <button onclick="logout()" class="w-full flex items-center space-x-2 px-4 py-3 hover:bg-gray-700 rounded transition duration-200 mt-10">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 ml-0 md:ml-64">
+            <!-- Ride Requests Tab -->
+            <div id="driver-ride-requests" class="driver-content">
+                <h2 class="text-2xl font-bold mb-6">Ride Requests</h2>
+                <div class="space-y-4">
+                    <!-- Ride Request 1 -->
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="font-bold">Standard Ride</h3>
+                                <p class="text-sm text-gray-500">2.5 miles away</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">$12.50</p>
+                                <p class="text-sm text-gray-500">~8 min</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-3">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                            <span>123 Main St to 456 Oak Ave</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="acceptRideRequest('1')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Accept
+                            </button>
+                            <button onclick="declineRideRequest('1')" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Decline
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ride Request 2 -->
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="font-bold">Premium Ride</h3>
+                                <p class="text-sm text-gray-500">1.8 miles away</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">$18.00</p>
+                                <p class="text-sm text-gray-500">~6 min</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-3">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                            <span>789 Pine St to 321 Elm Blvd</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="acceptRideRequest('2')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Accept
+                            </button>
+                            <button onclick="declineRideRequest('2')" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Decline
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Ride Tab -->
+            <div id="driver-current-ride" class="driver-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Current Ride</h2>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="space-y-6">
+                        <!-- Ride Info -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Ride Information</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-map-marker-alt text-blue-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Pickup Location</p>
+                                        <p class="text-sm text-gray-500">123 Main Street, Cityville</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="bg-green-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-flag-checkered text-green-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Dropoff Location</p>
+                                        <p class="text-sm text-gray-500">456 Oak Avenue, Townsville</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 mt-4">
+                                    <div class="text-center">
+                                        <p class="text-sm text-gray-500">Distance</p>
+                                        <p class="font-bold">2.5 miles</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-sm text-gray-500">ETA</p>
+                                        <p class="font-bold">8 min</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-sm text-gray-500">Fare</p>
+                                        <p class="font-bold">$12.50</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Passenger Info -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Passenger Information</h3>
+                            <div class="flex items-center">
+                                <img src="https://via.placeholder.com/50" alt="Passenger" class="w-12 h-12 rounded-full mr-4">
+                                <div>
+                                    <p class="font-medium">John D.</p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                        <span>4.8 (42 rides)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Timer and Complete Button -->
+                        <div class="pt-4 border-t">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm text-gray-500">Ride Duration</p>
+                                    <p id="ride-timer" class="text-2xl font-bold ride-timer">00:05:23</p>
+                                </div>
+                                <button onclick="completeRide()" class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition duration-200">
+                                    Complete Ride
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings Tab -->
+            <div id="driver-earnings" class="driver-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Earnings</h2>
+                <div class="space-y-6">
+                    <!-- Earnings Summary -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4">Summary</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">Today</p>
+                                <p class="text-2xl font-bold">$86.50</p>
+                                <p class="text-sm text-green-500">+3 rides</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">This Week</p>
+                                <p class="text-2xl font-bold">$425.75</p>
+                                <p class="text-sm text-green-500">+15 rides</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">This Month</p>
+                                <p class="text-2xl font-bold">$1,842.30</p>
+                                <p class="text-sm text-green-500">+68 rides</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Earnings History -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <h3 class="text-lg font-semibold p-6 pb-0">Ride History</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Passenger</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distance</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Jun 15, 2023</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">John D.</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">2.5 miles</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">$12.50</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Jun 14, 2023</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">Sarah M.</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">3.2 miles</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">$15.75</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Jun 13, 2023</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">Mike T.</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">4.1 miles</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">$20.50</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Cancelled</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Info Tab -->
+            <div id="driver-vehicle-info" class="driver-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Vehicle Information</h2>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="space-y-6">
+                        <!-- Vehicle Photo -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Vehicle Photo</h3>
+                            <div class="flex flex-col items-center">
+                                <img src="https://via.placeholder.com/300x150?text=Vehicle+Photo" alt="Vehicle" class="w-full max-w-md rounded-lg mb-4">
+                                <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                                    Upload New Photo
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Vehicle Details -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Vehicle Details</h3>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Make</label>
+                                        <input type="text" value="Toyota" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Model</label>
+                                        <input type="text" value="Corolla" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Year</label>
+                                        <input type="text" value="2020" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Color</label>
+                                        <input type="text" value="Silver" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">License Plate</label>
+                                    <input type="text" value="ABC1234" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Vehicle Type</label>
+                                    <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option>Standard</option>
+                                        <option selected>Premium</option>
+                                        <option>XL</option>
+                                        <option>Luxury</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Save Button -->
+                        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition duration-200 mt-4">
+                            Save Vehicle Information
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="driver-settings" class="driver-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Settings</h2>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="space-y-6">
+                        <!-- Profile Information -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center mb-4">
+                                    <div class="relative">
+                                        <img src="https://via.placeholder.com/100" alt="Profile" class="w-16 h-16 rounded-full">
+                                        <button class="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full">
+                                            <i class="fas fa-camera text-xs"></i>
+                                        </button>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="font-medium">Michael Johnson</p>
+                                        <p class="text-sm text-gray-500">Driver since Jan 2022</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">First Name</label>
+                                        <input type="text" value="Michael" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Last Name</label>
+                                        <input type="text" value="Johnson" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Email</label>
+                                    <input type="email" value="michael.johnson@example.com" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Phone Number</label>
+                                    <input type="tel" value="+1 (555) 987-6543" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Availability -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Availability</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="available" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
+                                    <label for="available" class="ml-2 block text-gray-700">Available for Rides</label>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Start Time</label>
+                                        <input type="time" value="08:00" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">End Time</label>
+                                        <input type="time" value="17:00" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Save Button -->
+                        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition duration-200 mt-4">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>

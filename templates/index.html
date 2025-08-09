@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Platform Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-tab {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .ride-timer {
+            font-family: 'Courier New', monospace;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                z-index: 40;
+                height: 100vh;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn fixed top-4 left-4 z-50 bg-blue-500 text-white p-2 rounded-md md:hidden" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Dashboard Selection -->
+    <div id="dashboard-selection" class="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-4">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">Taxi Platform</h1>
+            <div class="space-y-4">
+                <a href="{% url 'client' %}" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-user mr-2"></i> Client Dashboard
+                </a>
+                <a href="{% url 'driver' %}" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-taxi mr-2"></i> Driver Dashboard
+                </a>
+                <a href="{% url 'admin_panel' %}" class="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-shield-alt mr-2"></i> Admin Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Dashboard -->
+
+    <!-- Driver Dashboard -->
+
+    <!-- Admin Dashboard -->
+
+    <!-- Ride Complete Modal -->
+    <div id="ride-complete-modal" class="modal hidden">
+    <div class="modal-content p-6 bg-white rounded-lg shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Ride Completed</h3>
+            <button onclick="closeModal('ride-complete-modal')" class="text-gray-600 hover:text-gray-900">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <p class="text-lg">Thank you for using our service!</p>
+        <p class="text-lg">Cost: $<span id="ride-cost"></span></p>
+        <p class="text-lg">Rating: <span id="ride-rating"></span> Stars</p>
+        <p class="text-lg">Comment: <span id="ride-comment"></span></p>
+        <div class="mt-4">
+            <button onclick="closeModal('ride-complete-modal')" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+</html>
