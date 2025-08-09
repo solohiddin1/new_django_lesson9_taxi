@@ -18,7 +18,7 @@ urlpatterns = [
     path('update_client/<int:pk>',UpdateClient.as_view(),name='update_client'),
     path('delete_client/<int:pk>',DeleteClient.as_view(),name='delete_client'),
 
-    path('delete_deal/<int:pk>',DeleteDeal.as_view(),name='delete_deal'),
+    path('delete_deal/<int:pk>',DeleteDeal.as_view(),name='delete_deal'),   
     path('update_deal/<int:pk>',UpdateDeal.as_view(),name='update_deal'),
 
 

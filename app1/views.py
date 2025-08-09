@@ -104,6 +104,6 @@ class UpdateDeal(UpdateView):
 
 class DeleteDeal(DeleteView):
     model = Deal
-    template_name = 'delete_dela.html'
+    template_name = 'delete_deal.html'
     success_url = reverse_lazy('admin_panel')
 
